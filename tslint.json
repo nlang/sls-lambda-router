@@ -1,0 +1,7 @@
+{
+    "extends": "tslint:recommended",
+    "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
+    "rules": {
+      "max-classes-per-file": [false, 1]
+    }
+}
