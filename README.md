@@ -7,7 +7,7 @@ of `@Decorators` to register resource handlers and stuff.
 ## Usage
 (more details to come)
 
-```$xslt
+```typescript
 /** play.resource.ts **/
 export class PlayResource {
   
