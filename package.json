@@ -2,8 +2,8 @@
   "name": "sls-lambda-router",
   "version": "0.0.1",
   "description": "Another router for aws-lambda",
-  "main": "dist/src/index.js",
-  "typings": "dist/src/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "test": "mocha -r ts-node/register test/**/*.spec.ts"
   },
@@ -14,6 +14,7 @@
     "@types/chai": "^3.5.2",
     "@types/mocha": "^2.2.41",
     "@types/node": "^7.0.13",
+    "aws-sdk": "^2.49.0",
     "chai": "^3.5.0",
     "gulp": "^3.9.1",
     "gulp-mocha": "^3.0.1",
@@ -28,7 +29,6 @@
     "typescript": "^2.2.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.49.0",
     "route-recognizer": "^0.3.2"
   }
 }

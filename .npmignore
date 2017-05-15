@@ -1,0 +1,15 @@
+.idea/
+node_modules/
+*.log
+*.tgz
+
+lib/
+test/
+gulpfile.js
+tsconfig.json
+tslint.json
+typings.json
+typings
+dist/test
+
+sls-lambda-router*.tgz

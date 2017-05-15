@@ -5,7 +5,7 @@ var tslint = require("gulp-tslint");
 const mocha = require("gulp-mocha");
 
 gulp.task("lint", () =>
-    gulp.src("./lib/*.ts")
+    gulp.src("./lib/**/*.ts")
         .pipe(tslint({
             formatter: "verbose"
         }))
@@ -32,5 +32,5 @@ gulp.task("test", ["build"], function() {
 });
 
 gulp.task("watch", ["scripts"], function () {
-    gulp.watch("lib/*.ts", ["scripts"]);
+    gulp.watch("lib/**/*.ts", ["scripts"]);
 });
