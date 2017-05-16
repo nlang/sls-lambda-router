@@ -9,3 +9,4 @@ jspm_packages
 .idea
 .tscache
 dist
+sls-lambda-router-*.tgz
