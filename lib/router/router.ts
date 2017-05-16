@@ -3,6 +3,7 @@ import * as _ from "lodash";
 import {IAuthorizer, IHandlerParamDecorator} from "./router-decorators";
 const RouteRecognizer = require("route-recognizer"); // tslint:disable-line:no-require-imports no-var-requires
 import {Result} from "route-recognizer";
+import {RouterException} from "./router-exceptions";
 
 export enum HTTPVerb {
     ANY, CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE,
@@ -116,6 +117,63 @@ export class RouterResourceRegistry {
     }
 }
 
+export class Response {
+
+    public static ok(body?: any): Response {
+        if (body) {
+            return new Response(200, body);
+        }
+        return new Response(204);
+    }
+
+    public static created(body?: any) {
+        return new Response(201, body);
+    }
+
+    public static redirect(url: string) {
+        return new Response(301, null, {
+            Location: url,
+        });
+    }
+
+    public static badRequest(message: string): Response {
+        return new Response(400, message);
+    }
+
+    public static unauthorized(message: string): Response {
+        return new Response(401, message);
+    }
+
+    public static forbidden(message: string): Response {
+        return new Response(403, message);
+    }
+
+    public static notFound(message: string): Response {
+        return new Response(404, message);
+    }
+
+    public static serverError(message: string): Response {
+        return new Response(500, message);
+    }
+
+    public static notImplemented(message: string): Response {
+        return new Response(501, message);
+    }
+
+    constructor(private statusCode: number, private body?: any, private headers?: any) {
+    }
+
+    public sendJson(callback: Callback): any {
+        return callback(null, {
+            body: JSON.stringify(this.body),
+            headers: _.extend({}, this.headers, {
+                "Content-Type": "application/json",
+            }),
+            statusCode: this.statusCode,
+        });
+    }
+}
+
 export class Router {
 
     public static getInstance(): Router {
@@ -184,12 +242,30 @@ export class Router {
                     // any of the names
                     _.extend(event.pathParameters, route.params);
                     const args = this.buildArgsArray(route.signature, event, context, callback);
-
                     route.restriction.authorize(event, context, args).then(() => {
-                        const res = route.handler.apply(null, args);
-                        resolve(res);
-                    }).catch((err) => {
-                        reject(err);
+                        let response;
+                        try {
+                            response = route.handler.apply(null, args);
+                        } catch (err) {
+                            if (err instanceof RouterException) {
+                                response = new Response(err.httpStatusCode, err.message);
+                            } else {
+                                reject(err);
+                                return;
+                            }
+                        }
+
+                        if (response instanceof Response) {
+                            resolve(this.sendResponse(callback, response));
+                        } else {
+                            resolve(response);
+                        }
+                    }).catch((authorizerResult) => {
+                        if (authorizerResult instanceof Response) {
+                            resolve(this.sendResponse(callback, authorizerResult));
+                        } else {
+                            reject(authorizerResult);
+                        }
                     });
                 } catch (err) {
                     throw new RoutingError(err.message, event, context, callback);
@@ -220,6 +296,10 @@ export class Router {
             }
         }
         return this.routes[key];
+    }
+
+    private sendResponse(callback: Callback, response: Response): any {
+        return response.sendJson(callback);
     }
 }
 

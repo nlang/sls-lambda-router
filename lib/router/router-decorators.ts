@@ -5,15 +5,15 @@ import {HTTPVerb} from "./router";
 export class HttpMethodDecorator {
 
     public static ANY(paths: string[]) {
-        return this.register.bind({paths, verb: HTTPVerb.ANY});
+        return HttpMethodDecorator.register.bind({paths, verb: HTTPVerb.ANY});
     }
 
     public static CONNECT(paths: string[]) {
-        return this.register.bind({paths, verb: HTTPVerb.CONNECT});
+        return HttpMethodDecorator.register.bind({paths, verb: HTTPVerb.CONNECT});
     }
 
     public static DELETE(paths: string[]) {
-        return this.register.bind({paths, verb: HTTPVerb.DELETE});
+        return HttpMethodDecorator.register.bind({paths, verb: HTTPVerb.DELETE});
     }
 
     public static GET(paths: string[]) {
@@ -21,27 +21,27 @@ export class HttpMethodDecorator {
     }
 
     public static HEAD(paths: string[]) {
-        return this.register.bind({paths, verb: HTTPVerb.HEAD});
+        return HttpMethodDecorator.register.bind({paths, verb: HTTPVerb.HEAD});
     }
 
     public static OPTIONS(paths: string[]) {
-        return this.register.bind({paths, verb: HTTPVerb.OPTIONS});
+        return HttpMethodDecorator.register.bind({paths, verb: HTTPVerb.OPTIONS});
     }
 
     public static PATCH(paths: string[]) {
-        return this.register.bind({paths, verb: HTTPVerb.PATCH});
+        return HttpMethodDecorator.register.bind({paths, verb: HTTPVerb.PATCH});
     }
 
     public static POST(paths: string[]) {
-        return this.register.bind({paths, verb: HTTPVerb.POST});
+        return HttpMethodDecorator.register.bind({paths, verb: HTTPVerb.POST});
     }
 
     public static PUT(paths: string[]) {
-        return this.register.bind({paths, verb: HTTPVerb.PUT});
+        return HttpMethodDecorator.register.bind({paths, verb: HTTPVerb.PUT});
     }
 
     public static TRACE(paths: string[]) {
-        return this.register.bind({paths, verb: HTTPVerb.TRACE});
+        return HttpMethodDecorator.register.bind({paths, verb: HTTPVerb.TRACE});
     }
 
     private static register(this: { paths: string[], verb: HTTPVerb },

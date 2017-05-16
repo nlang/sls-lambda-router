@@ -16,6 +16,7 @@
     "@types/node": "^7.0.13",
     "aws-sdk": "^2.49.0",
     "chai": "^3.5.0",
+    "chai-spies": "^0.7.1",
     "gulp": "^3.9.1",
     "gulp-mocha": "^3.0.1",
     "gulp-sourcemaps": "^1.6.0",
