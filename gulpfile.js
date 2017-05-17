@@ -2,7 +2,7 @@ var gulp = require("gulp");
 var ts = require("gulp-typescript");
 var merge = require("merge2");
 var tslint = require("gulp-tslint");
-const mocha = require("gulp-mocha");
+var shell = require('gulp-shell');
 
 gulp.task("lint", () =>
     gulp.src("./lib/**/*.ts")
@@ -27,10 +27,9 @@ gulp.task("build", ["lint"], function () {
 });
 
 gulp.task("test", ["build"], function() {
-    gulp.src(["./dist/test/**/*.spec.js"], {read: false})
-        .pipe(mocha({reporter: "progress"}))
+    return gulp.src('./test').pipe(shell('npm test'));
 });
 
-gulp.task("watch", ["scripts"], function () {
-    gulp.watch("lib/**/*.ts", ["scripts"]);
+gulp.task("release", ["test"], function() {
+    return gulp.src('./').pipe(shell('npm pack'));
 });
