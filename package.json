@@ -1,9 +1,25 @@
 {
   "name": "sls-lambda-router",
-  "version": "0.0.1",
+  "version": "0.0.1a",
   "description": "Another router for aws-lambda",
+  "readmeFilename": "README.md",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/nlang/sls-lambda-router.git"
+  },
+  "keywords": [
+    "router",
+    "aws-lambda",
+    "serverless",
+    "typescript"
+  ],
+  "author": {
+    "name": "Nicolai Lang",
+    "email": "npm@nicolai-lang.de",
+    "url": "http://nicolai-lang.de"
+  },
   "scripts": {
     "test": "mocha -r ts-node/register test/**/*.spec.ts"
   },
