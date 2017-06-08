@@ -1,6 +1,6 @@
 {
   "name": "sls-lambda-router",
-  "version": "0.0.1a",
+  "version": "0.0.2",
   "description": "Another router for aws-lambda",
   "readmeFilename": "README.md",
   "main": "./dist/index.js",

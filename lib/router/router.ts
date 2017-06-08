@@ -185,9 +185,20 @@ export class Router {
 
     private static $instance: Router = null;
     private routes: object;
+    private anyAuthorizer: IAuthorizer = new AnyCallAuthorizer();
+    private defaultAuthorizer: IAuthorizer;
 
     private constructor() {
         this.routes = {};
+    }
+
+    public setDefaultAuthorizer(authorizer: IAuthorizer, restrictedOnly: boolean = true): void {
+        if (authorizer && !restrictedOnly) {
+            this.anyAuthorizer = authorizer;
+        } else if (restrictedOnly && !(this.anyAuthorizer instanceof AnyCallAuthorizer)) {
+            this.anyAuthorizer = new AnyCallAuthorizer();
+        }
+        this.defaultAuthorizer = authorizer;
     }
 
     public registerResource(resource: any) {
@@ -196,7 +207,13 @@ export class Router {
             for (const handler of registration.handlers) {
                 const boundMethod = resource[handler.propertyKey].bind(resource);
                 const signature = registration.params[handler.propertyKey];
-                const restriction = registration.restrictions[handler.propertyKey];
+                let restriction = null;
+                if (registration.restrictions && registration.restrictions.hasOwnProperty(handler.propertyKey)) {
+                    restriction = registration.restrictions[handler.propertyKey];
+                    if (!restriction) {
+                        restriction = this.defaultAuthorizer;
+                    }
+                }
                 this.register(handler.verb, handler.path, boundMethod, signature, restriction);
             }
         }
@@ -209,7 +226,7 @@ export class Router {
                     restriction: IAuthorizer): void {
 
         if (!restriction) {
-            restriction = new AnyCallAuthorizer();
+            restriction = this.anyAuthorizer;
         }
         this.getRoutes(verb, true).add(path, handler, signature, restriction);
     }
