@@ -274,6 +274,19 @@ export class Router {
 
                         if (response instanceof Response) {
                             resolve(this.sendResponse(callback, response));
+                        } else if (response instanceof Promise) {
+                            response.then((promisedResponse) => {
+                                this.sendResponse(callback, promisedResponse);
+                            }).catch((promisedError) => {
+                                if (promisedError instanceof RouterException) {
+                                    this.sendResponse(
+                                        callback,
+                                        new Response(promisedError.httpStatusCode, promisedError.message),
+                                    );
+                                } else {
+                                    reject(promisedError);
+                                }
+                            });
                         } else {
                             resolve(response);
                         }
