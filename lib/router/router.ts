@@ -119,15 +119,23 @@ export class RouterResourceRegistry {
 
 export class Response {
 
-    public static ok(body?: any): Response {
+    public static ok(body?: any, contentType?: string): Response {
         if (body) {
-            return new Response(200, body);
+            const response = new Response(200, body);
+            if (contentType) {
+                response.setContentType(contentType);
+            }
+            return response;
         }
         return new Response(204);
     }
 
-    public static created(body?: any) {
-        return new Response(201, body);
+    public static created(body?: any, contentType?: string) {
+        const response = new Response(201, body);
+        if (contentType) {
+            response.setContentType(contentType);
+        }
+        return response;
     }
 
     public static redirect(url: string) {
@@ -136,39 +144,121 @@ export class Response {
         });
     }
 
-    public static badRequest(message: string): Response {
-        return new Response(400, message);
+    public static badRequest(message?: string, contentType?: string): Response {
+        const response = new Response(400, message || "Bad Request");
+        if (contentType) {
+            response.setContentType(contentType);
+        }
+        return response;
     }
 
-    public static unauthorized(message: string): Response {
-        return new Response(401, message);
+    public static unauthorized(message: string, contentType?: string): Response {
+        const response = new Response(401, message || "Unauthorized");
+        if (contentType) {
+            response.setContentType(contentType);
+        }
+        return response;
     }
 
-    public static forbidden(message: string): Response {
-        return new Response(403, message);
+    public static forbidden(message: string, contentType?: string): Response {
+        const response = new Response(403, message || "Forbidden");
+        if (contentType) {
+            response.setContentType(contentType);
+        }
+        return response;
     }
 
-    public static notFound(message: string): Response {
-        return new Response(404, message);
+    public static notFound(message: string, contentType?: string): Response {
+        const response = new Response(404, message || "Not Found");
+        if (contentType) {
+            response.setContentType(contentType);
+        }
+        return response;
     }
 
-    public static serverError(message: string): Response {
-        return new Response(500, message);
+    public static serverError(message: string, contentType?: string): Response {
+        const response = new Response(500, message || "Internal Server Error");
+        if (contentType) {
+            response.setContentType(contentType);
+        }
+        return response;
     }
 
-    public static notImplemented(message: string): Response {
-        return new Response(501, message);
+    public static notImplemented(message: string, contentType?: string): Response {
+        const response = new Response(501, message || "Not Implemented");
+        if (contentType) {
+            response.setContentType(contentType);
+        }
+        return response;
     }
 
-    constructor(private statusCode: number, private body?: any, private headers?: any) {
+    constructor(private statusCode: number, private body?: any, private headers: { [key: string]: string } = {}) {
+    }
+
+    public setHeaders(headers: { [key: string]: string }): void {
+        for (const header of Object.keys(headers)) {
+            this.setHeader(header.toLowerCase(), headers[header]);
+        }
+    }
+
+    public setHeader(key: string, value: string): void {
+        if (_.isString(key)) {
+            if (_.isNull(value) || _.isUndefined(value)) {
+                delete this.headers[key];
+            } else {
+                this.headers[key.toLowerCase()] = value;
+            }
+        }
+    }
+
+    public getHeader(key: string): string {
+        if (_.isString(key)) {
+            return this.headers[key.toLowerCase()];
+        }
+        return null;
+    }
+
+    public setContentType(contentType: string) {
+        this.setHeader("content-type", contentType);
+    }
+
+    public getContentType(): string {
+        return this.getHeader("content-type");
+    }
+
+    public send(callback: Callback, contentType?: string) {
+        if (!contentType) {
+            contentType = this.getContentType();
+        }
+        if (!contentType) {
+            // assume text as default
+            contentType = "text/plain";
+        }
+
+        this.setContentType(contentType);
+        switch (contentType.toUpperCase()) {
+            case "application/json".toUpperCase():
+                return this.sendJson(callback);
+
+            default:
+                return callback(null, {
+                    body: this.body,
+                    headers: this.headers,
+                    statusCode: this.statusCode,
+                });
+        }
     }
 
     public sendJson(callback: Callback): any {
+
+        let json = this.body;
+        if (_.isObject(this.body) || _.isArray(this.body)) {
+            json = JSON.stringify(this.body);
+        }
+
         return callback(null, {
-            body: JSON.stringify(this.body),
-            headers: _.extend({}, this.headers, {
-                "Content-Type": "application/json",
-            }),
+            body: json,
+            headers: this.headers,
             statusCode: this.statusCode,
         });
     }
@@ -276,13 +366,15 @@ export class Router {
                             resolve(this.sendResponse(callback, response));
                         } else if (response instanceof Promise) {
                             response.then((promisedResponse) => {
-                                this.sendResponse(callback, promisedResponse);
+                                resolve(this.sendResponse(callback, promisedResponse));
                             }).catch((promisedError) => {
-                                if (promisedError instanceof RouterException) {
-                                    this.sendResponse(
+                                if (promisedError instanceof Response) {
+                                    resolve(this.sendResponse(callback, promisedError));
+                                } else if (promisedError instanceof RouterException) {
+                                    resolve(this.sendResponse(
                                         callback,
                                         new Response(promisedError.httpStatusCode, promisedError.message),
-                                    );
+                                    ));
                                 } else {
                                     reject(promisedError);
                                 }
@@ -329,7 +421,7 @@ export class Router {
     }
 
     private sendResponse(callback: Callback, response: Response): any {
-        return response.sendJson(callback);
+        return response.send(callback);
     }
 }
 
