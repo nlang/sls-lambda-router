@@ -232,7 +232,7 @@ export class Response {
         }
         if (!contentType) {
 
-            if (_.isObjectLike(this.body)) {
+            if (_.isObject(this.body) || _.isArray(this.body)) {
                 // assume json if body is array/object
                 contentType = "application/json";
             } else {
@@ -257,7 +257,7 @@ export class Response {
     public sendJson(callback: Callback): any {
 
         let json = this.body;
-        if (_.isObjectLike(this.body)) {
+        if (_.isObject(this.body) || _.isArray(this.body)) {
             json = JSON.stringify(this.body);
         }
 

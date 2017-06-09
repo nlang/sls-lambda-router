@@ -1,6 +1,6 @@
 {
   "name": "sls-lambda-router",
-  "version": "0.0.5a",
+  "version": "0.0.5b",
   "description": "Another router for aws-lambda",
   "readmeFilename": "README.md",
   "main": "./dist/index.js",
@@ -15,19 +15,15 @@
     "serverless",
     "typescript"
   ],
-  "author": {
-    "name": "Nicolai Lang",
-    "email": "npm@nicolai-lang.de",
-    "url": "http://nicolai-lang.de"
-  },
+  "author": "Nicolai Lang (git@nicolai-lang.de)",
   "scripts": {
     "test": "mocha -r ts-node/register test/**/*.spec.ts"
   },
-  "author": "Nicolai Lang (git@nicolai-lang.de)",
   "license": "MIT",
   "devDependencies": {
     "@types/aws-lambda": "0.0.10",
     "@types/chai": "^3.5.2",
+    "@types/lodash": "^4.14.65",
     "@types/mocha": "^2.2.41",
     "@types/node": "^7.0.13",
     "aws-sdk": "^2.49.0",
@@ -47,7 +43,7 @@
     "typescript": "^2.2.2"
   },
   "dependencies": {
-    "route-recognizer": "^0.3.2",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.4",
+    "route-recognizer": "^0.3.2"
   }
 }
