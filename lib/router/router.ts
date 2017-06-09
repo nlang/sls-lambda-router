@@ -87,7 +87,7 @@ export class RouterResourceRegistry {
 
     public static find(resource: object): IRouterResourceRegistration {
         for (const reg of this.registrations) {
-            if (resource instanceof reg.constructor) {
+            if (resource instanceof reg.target.constructor) {
                 return reg;
             }
         }
