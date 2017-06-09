@@ -152,7 +152,7 @@ export class Response {
         return response;
     }
 
-    public static unauthorized(message: string, contentType?: string): Response {
+    public static unauthorized(message?: string, contentType?: string): Response {
         const response = new Response(401, message || "Unauthorized");
         if (contentType) {
             response.setContentType(contentType);
@@ -160,7 +160,7 @@ export class Response {
         return response;
     }
 
-    public static forbidden(message: string, contentType?: string): Response {
+    public static forbidden(message?: string, contentType?: string): Response {
         const response = new Response(403, message || "Forbidden");
         if (contentType) {
             response.setContentType(contentType);
@@ -168,7 +168,7 @@ export class Response {
         return response;
     }
 
-    public static notFound(message: string, contentType?: string): Response {
+    public static notFound(message?: string, contentType?: string): Response {
         const response = new Response(404, message || "Not Found");
         if (contentType) {
             response.setContentType(contentType);
@@ -176,7 +176,7 @@ export class Response {
         return response;
     }
 
-    public static serverError(message: string, contentType?: string): Response {
+    public static serverError(message?: string, contentType?: string): Response {
         const response = new Response(500, message || "Internal Server Error");
         if (contentType) {
             response.setContentType(contentType);
@@ -184,7 +184,7 @@ export class Response {
         return response;
     }
 
-    public static notImplemented(message: string, contentType?: string): Response {
+    public static notImplemented(message?: string, contentType?: string): Response {
         const response = new Response(501, message || "Not Implemented");
         if (contentType) {
             response.setContentType(contentType);
@@ -231,8 +231,13 @@ export class Response {
             contentType = this.getContentType();
         }
         if (!contentType) {
-            // assume text as default
-            contentType = "text/plain";
+
+            if (_.isObjectLike(this.body)) {
+                // assume json if body is array/object
+                contentType = "application/json";
+            } else {
+                contentType = "text/plain";
+            }
         }
 
         this.setContentType(contentType);
@@ -252,7 +257,7 @@ export class Response {
     public sendJson(callback: Callback): any {
 
         let json = this.body;
-        if (_.isObject(this.body) || _.isArray(this.body)) {
+        if (_.isObjectLike(this.body)) {
             json = JSON.stringify(this.body);
         }
 
