@@ -47,7 +47,7 @@ class Paths {
 
 class AnyCallAuthorizer implements IAuthorizer {
 
-    public authorize(event: APIGatewayEvent, context: Context, handlerArgs?: any): Promise<boolean> {
+    public authorize(event: APIGatewayEvent, context: Context, handlerArgs?: any): Promise<any> {
         return new Promise((res) => {
             res(true);
         });

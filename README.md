@@ -1,9 +1,7 @@
 # Serverless Lambda Router
 > A router for AWS Lambda serverless applications written in TypeScript that makes use
 of `@Decorators` to register resource handlers and stuff.
-
- ## IMPORTANT: This is work in progress...
- 
+  
 ## Usage
 (more details to come)
 
@@ -11,30 +9,21 @@ of `@Decorators` to register resource handlers and stuff.
 /** play.resource.ts **/
 export class PlayResource {
   
-  <...*SNIP*...>
-  
-  @GET(["/my/api/v1/play/:game])
+  @GET(["/my/api/v1/play/:game"])
   public playGame(@HttpEvent event: APIGatewayEvent,
                   @PathParam("game") game: string,
-                  @LambdaCallback callback: Callback): void {
+                  @LambdaCallback callback: Callback): Promise<Response> {
     
     const game = Game.get(game);
-    
-    try {
-      const fun = game.play();
-        callback(null, {
-            body: JSON.stringify(fun),
-            statusCode: 200,
-        });
-    } catch (err) {
-      throw new BadRequestException(err);
-    }
+    return game.start().then((res) => {
+        return Response.ok(res, "application/json");
+    }).catch ((err) => {
+        throw new BadRequestException(err);
+    });
 }
 
 /** handler.ts **/
 class Appllication {
-
-  <...*SNIP*...>
 
   public handler(event: APIGatewayEvent, context: Context, callback: Callback) {
     this.router.registerResource(new PlayResource());

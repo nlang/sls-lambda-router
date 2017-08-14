@@ -62,7 +62,7 @@ export const PUT = HttpMethodDecorator.PUT;
 export const TRACE = HttpMethodDecorator.TRACE;
 
 export interface IAuthorizer {
-    authorize(event: APIGatewayEvent, context: Context, handlerArgs?: any): Promise<boolean>;
+    authorize(event: APIGatewayEvent, context: Context, handlerArgs?: any): Promise<any>;
 }
 
 export class ControlDecorator {
