@@ -11,8 +11,7 @@ export class PlayResource {
   
   @GET(["/my/api/v1/play/:game"])
   public playGame(@HttpEvent event: APIGatewayEvent,
-                  @PathParam("game") game: string,
-                  @LambdaCallback callback: Callback): Promise<Response> {
+                  @PathParam("game") game: string): Promise<Response> {
     
     const game = Game.get(game);
     return game.start().then((res) => {
