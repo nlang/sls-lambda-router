@@ -120,7 +120,7 @@ export class RouterResourceRegistry {
 
 export interface ICorsConfiguration {
     defaultEnabled: boolean;
-    origins: string[];
+    allowedOrigins: string[];
     allowCredentials: boolean;
     exposeHeaders: string[];
     allowHeaders: string[];
@@ -209,9 +209,9 @@ export class Response {
     private static corsConfiguration: ICorsConfiguration = {
         allowCredentials: true,
         allowHeaders: ["Content-type"],
+        allowedOrigins: ["(.*)"],
         defaultEnabled: false,
         exposeHeaders: [],
-        origins: ["(.*)"],
         requestOrigin: null,
     };
 
@@ -296,7 +296,6 @@ export class Response {
     }
 
     public sendJson(callback: Callback): void {
-
         let json = this.body;
         if (_.isObject(this.body) || _.isArray(this.body)) {
             json = JSON.stringify(this.body);
@@ -314,14 +313,21 @@ export class Response {
     }
 
     private applyCors(): void {
-        if (this.corsEnabled || (Response.corsConfiguration && Response.corsConfiguration.defaultEnabled)) {
-            this.setHeader("Access-Control-Allow-Origin", this.origin || Response.corsConfiguration.requestOrigin);
-            this.setHeader(
-                "Access-Control-Allow-Credentials",
-                Response.corsConfiguration.allowCredentials ? "true" : "false",
-            );
-            this.setHeader("Access-Control-Expose-Headers", Response.corsConfiguration.exposeHeaders.join(","));
-            this.setHeader("Access-Control-Allow-Headers", Response.corsConfiguration.allowHeaders.join(","));
+        const corsCfg = Response.corsConfiguration;
+        if (this.corsEnabled || (corsCfg && corsCfg.defaultEnabled)) {
+            const origin = this.origin || corsCfg.requestOrigin;
+            if (corsCfg.allowedOrigins) {
+                for (const allowedOrigin of corsCfg.allowedOrigins) {
+                    if (origin.match(allowedOrigin)) {
+                        this.setHeader("Access-Control-Allow-Origin", origin);
+                        this.setHeader("Access-Control-Allow-Credentials", corsCfg.allowCredentials ? "true" : "false");
+                        this.setHeader("Access-Control-Expose-Headers", corsCfg.exposeHeaders.join(","));
+                        this.setHeader("Access-Control-Allow-Headers", corsCfg.allowHeaders.join(","));
+                        return;
+                    }
+                }
+                throw new Error("Invalid origin");
+            }
         }
     }
 }
