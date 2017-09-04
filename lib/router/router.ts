@@ -1,6 +1,7 @@
 import {APIGatewayEvent, Callback, Context} from "aws-lambda";
 import * as _ from "lodash";
 import {IAuthorizer, IHandlerParamDecorator} from "./router-decorators";
+
 const RouteRecognizer = require("route-recognizer"); // tslint:disable-line:no-require-imports no-var-requires
 import {Result} from "route-recognizer";
 import {RouterException} from "./router-exceptions";
@@ -117,6 +118,15 @@ export class RouterResourceRegistry {
     }
 }
 
+export interface ICorsConfiguration {
+    defaultEnabled: boolean;
+    origins: string[];
+    allowCredentials: boolean;
+    exposeHeaders: string[];
+    allowHeaders: string[];
+    requestOrigin?: string;
+}
+
 export class Response {
 
     public static ok(body?: any, contentType?: string): Response {
@@ -192,16 +202,49 @@ export class Response {
         return response;
     }
 
+    public static setCorsConfiguration(conf: ICorsConfiguration): void {
+        Response.corsConfiguration = conf;
+    }
+
+    private static corsConfiguration: ICorsConfiguration = {
+        allowCredentials: true,
+        allowHeaders: ["Content-type"],
+        defaultEnabled: false,
+        exposeHeaders: [],
+        origins: ["(.*)"],
+        requestOrigin: null,
+    };
+
+    private corsEnabled: boolean = null;
+    private origin: string = null;
+
     constructor(private statusCode: number, private body?: any, private headers: { [key: string]: string } = {}) {
     }
 
-    public setHeaders(headers: { [key: string]: string }): void {
+    public enableCors(origin: string): Response {
+        this.corsEnabled = true;
+        this.origin = origin;
+        return this;
+    }
+
+    public disableCors(): Response {
+        this.corsEnabled = false;
+        return this;
+    }
+
+    public setRequestOrigin(origin: string): Response {
+        this.origin = origin;
+        return this;
+    }
+
+    public setHeaders(headers: { [key: string]: string }): Response {
         for (const header of Object.keys(headers)) {
             this.setHeader(header.toLowerCase(), headers[header]);
         }
+        return this;
     }
 
-    public setHeader(key: string, value: string): void {
+    public setHeader(key: string, value: string): Response {
         if (_.isString(key)) {
             if (_.isNull(value) || _.isUndefined(value)) {
                 delete this.headers[key];
@@ -209,6 +252,7 @@ export class Response {
                 this.headers[key.toLowerCase()] = value;
             }
         }
+        return this;
     }
 
     public getHeader(key: string): string {
@@ -218,15 +262,16 @@ export class Response {
         return null;
     }
 
-    public setContentType(contentType: string) {
+    public setContentType(contentType: string): Response {
         this.setHeader("content-type", contentType);
+        return this;
     }
 
     public getContentType(): string {
         return this.getHeader("content-type");
     }
 
-    public send(callback: Callback, contentType?: string) {
+    public send(callback: Callback, contentType?: string): void {
         if (!contentType) {
             contentType = this.getContentType();
         }
@@ -246,26 +291,38 @@ export class Response {
                 return this.sendJson(callback);
 
             default:
-                return callback(null, {
-                    body: this.body,
-                    headers: this.headers,
-                    statusCode: this.statusCode,
-                });
+                return this.doSend(callback);
         }
     }
 
-    public sendJson(callback: Callback): any {
+    public sendJson(callback: Callback): void {
 
         let json = this.body;
         if (_.isObject(this.body) || _.isArray(this.body)) {
             json = JSON.stringify(this.body);
         }
+        return this.doSend(callback, json);
+    }
 
+    private doSend(callback: Callback, body?: any): void {
+        this.applyCors();
         return callback(null, {
-            body: json,
+            body: (body ? body : this.body),
             headers: this.headers,
             statusCode: this.statusCode,
         });
+    }
+
+    private applyCors(): void {
+        if (this.corsEnabled || (Response.corsConfiguration && Response.corsConfiguration.defaultEnabled)) {
+            this.setHeader("Access-Control-Allow-Origin", this.origin || Response.corsConfiguration.requestOrigin);
+            this.setHeader(
+                "Access-Control-Allow-Credentials",
+                Response.corsConfiguration.allowCredentials ? "true" : "false",
+            );
+            this.setHeader("Access-Control-Expose-Headers", Response.corsConfiguration.exposeHeaders.join(","));
+            this.setHeader("Access-Control-Allow-Headers", Response.corsConfiguration.allowHeaders.join(","));
+        }
     }
 }
 
