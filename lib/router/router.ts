@@ -218,7 +218,7 @@ export class Response {
     private corsEnabled: boolean = null;
     private origin: string = null;
 
-    constructor(private statusCode: number, private body?: any, private headers: { [key: string]: string } = {}) {
+    constructor(public statusCode: number, public body?: any, public headers: { [key: string]: string } = {}) {
     }
 
     public enableCors(origin: string): Response {
