@@ -304,18 +304,27 @@ export class Response {
     }
 
     private doSend(callback: Callback, body?: any): void {
-        this.applyCors();
-        return callback(null, {
-            body: (body ? body : this.body),
-            headers: this.headers,
-            statusCode: this.statusCode,
-        });
+        try {
+            this.applyCors();
+            return callback(null, {
+                body: (body ? body : this.body),
+                headers: this.headers,
+                statusCode: this.statusCode,
+            });
+        } catch (err) {
+            this.setContentType("text/plain");
+            return callback(null, {
+                body: "Invalid origin",
+                headers: this.headers,
+                statusCode: 400,
+            });
+        }
     }
 
     private applyCors(): void {
         const corsCfg = Response.corsConfiguration;
         if (this.corsEnabled || (corsCfg && corsCfg.defaultEnabled)) {
-            const origin = this.origin || corsCfg.requestOrigin;
+            const origin = this.origin || corsCfg.requestOrigin || "";
             if (corsCfg.allowedOrigins) {
                 for (const allowedOrigin of corsCfg.allowedOrigins) {
                     if (origin.match(allowedOrigin)) {
@@ -489,7 +498,8 @@ export class Router {
     }
 
     private sendResponse(callback: Callback, response: Response): any {
-        return response.send(callback);
+        response.send(callback);
+        return response;
     }
 }
 
