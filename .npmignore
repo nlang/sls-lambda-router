@@ -3,7 +3,7 @@ node_modules/
 *.log
 *.tgz
 
-lib/
+src/
 test/
 gulpfile.js
 tsconfig.json

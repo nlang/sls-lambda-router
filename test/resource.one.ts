@@ -1,11 +1,8 @@
 import {APIGatewayEvent, Callback} from "aws-lambda";
-import {
-    ANY, DELETE, GET, HttpEvent, JsonBody, LambdaCallback, PathParam, POST,
-    PUT
-} from "../lib/router/router-decorators";
 import {Helpers} from "./helper";
-import {BadRequestException, UnauthorizedException} from "../lib/router/router-exceptions";
-import {Response} from "../lib/router/router";
+import {ANY, DELETE, GET, POST, PUT} from "../src/decorator/HttpMethodDecorator";
+import {HttpEvent, JsonBody, LambdaCallback, PathParam} from "../src/decorator/ApiGatewayInvokeDecorator";
+import {BadRequestException, ControlDecorator, Response, UnauthorizedException} from "../src";
 
 export class TestResourceOne {
 
@@ -27,6 +24,10 @@ export class TestResourceOne {
 
     public static handlerMethod5Data = {
         event: Helpers.createApiGwEvent("ANY", "/test/resource/dont/care/5", null, "", null ),
+    };
+
+    public static handlerMethod6Data = {
+        event: Helpers.createApiGwEvent("DELETE", "/test/resource/restricted", null, "", null ),
     };
 
     @GET(["/test/resource/:with/some/:param"])
@@ -63,6 +64,12 @@ export class TestResourceOne {
     @ANY(["/test/resource/dont/care/5"])
     public handlerMethod5(@JsonBody body: any) {
         return Response.redirect("https://www.google.com");
+    }
+
+    @DELETE(["/test/resource/restricted"])
+    @ControlDecorator.Restricted(null, "foo1")
+    public handlerMethod6(@HttpEvent event: APIGatewayEvent) {
+        return Response.ok();
     }
 
 }

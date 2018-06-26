@@ -1,0 +1,3 @@
+export enum HTTPVerb {
+    ANY, CONNECT, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT, TRACE,
+}
