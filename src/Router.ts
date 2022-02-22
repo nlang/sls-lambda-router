@@ -75,24 +75,8 @@ export class Router {
 
     public async route(event: APIGatewayEvent, context: Context, callback: Callback): Promise<any> {
         return new Promise((resolve, reject) => {
-            const verb: HTTPVerb = HTTPVerb[event.httpMethod.toUpperCase()];
-            const path: string = event.path;
 
-            let routes = this.getRoutes(verb, false);
-            if (null == routes) {
-                routes = this.getRoutes(HTTPVerb.ANY, false);
-                if (null == routes) {
-                    throw new UnknownRouteError("Route not found", event, context, callback);
-                }
-            }
-
-            let route: Route = routes.match(path);
-            if (null == route && routes.verb !== HTTPVerb.ANY) {
-                routes = this.getRoutes(HTTPVerb.ANY, false);
-                if (null != routes) {
-                    route = routes.match(path);
-                }
-            }
+            const route = this.determineBestRoute(event, context);
 
             if (null != route && typeof route.handler === "function") {
                 try {
@@ -148,6 +132,30 @@ export class Router {
                 throw new UnknownRouteError("Route not found", event, context, callback);
             }
         });
+    }
+
+    public determineBestRoute(event: APIGatewayEvent, context: Context): Route {
+
+        const verb: HTTPVerb = HTTPVerb[event.httpMethod.toUpperCase()];
+        const path: string = event.path;
+
+        let routes = this.getRoutes(verb, false);
+        if (null == routes) {
+            routes = this.getRoutes(HTTPVerb.ANY, false);
+            if (null == routes) {
+                throw new UnknownRouteError("Route not found", event, context, null);
+            }
+        }
+
+        let route: Route = routes.match(path);
+        if (null == route && routes.verb !== HTTPVerb.ANY) {
+            routes = this.getRoutes(HTTPVerb.ANY, false);
+            if (null != routes) {
+                route = routes.match(path);
+            }
+        }
+
+        return route;
     }
 
     private buildArgsArray(signature: IHandlerParamDecorator[],

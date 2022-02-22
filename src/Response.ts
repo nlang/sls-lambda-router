@@ -1,4 +1,4 @@
-import {Callback} from "aws-lambda";
+import {APIGatewayProxyResult, Callback} from "aws-lambda";
 import * as _ from "lodash";
 
 export interface ICorsConfiguration {
@@ -152,6 +152,14 @@ export class Response {
 
     public getContentType(): string {
         return this.getHeader("content-type");
+    }
+
+    public getResponsePromise(contentType?: string): Promise<APIGatewayProxyResult> {
+        let res;
+        this.send((error, response) => {
+            res = response;
+        }, contentType);
+        return Promise.resolve(res);
     }
 
     public send(callback: Callback, contentType?: string): void {

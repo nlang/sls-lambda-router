@@ -1,6 +1,25 @@
-export {ApiGatewayInvokeDecorator} from "./decorator/ApiGatewayInvokeDecorator";
+export {
+    LambdaCallback,
+    LambdaContext,
+    HttpEvent,
+    JsonBody,
+    PathParam,
+    QueryParam,
+} from "./decorator/ApiGatewayInvokeDecorator";
+
 export {ControlDecorator} from "./decorator/ControlDecorator";
-export {HttpMethodDecorator} from "./decorator/HttpMethodDecorator";
+export {
+    ANY,
+    CONNECT,
+    DELETE,
+    GET,
+    HEAD,
+    OPTIONS,
+    PATCH,
+    POST,
+    PUT,
+    TRACE,
+} from "./decorator/HttpMethodDecorator";
 
 export {BadGatewayException} from "./exceptions/BadGatewayException";
 export {BadRequestException} from "./exceptions/BadRequestException";

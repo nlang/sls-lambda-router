@@ -1,6 +1,5 @@
-const RouteRecognizer = require("route-recognizer"); // tslint:disable-line:no-require-imports no-var-requires
+import RouteRecognizer, {Results} from "route-recognizer";
 import {IHandlerParamDecorator} from "./decorator/ApiGatewayInvokeDecorator";
-import {Result} from "route-recognizer";
 import {HTTPVerb} from "./HTTPVerb";
 import {Route} from "./Route";
 import {IAuthorizer} from "./IAuthorizer";
@@ -19,7 +18,7 @@ export class Paths {
     }
 
     public match(path: string): Route {
-        const results: Result[] = this.routeRecognizer.recognize(path);
+        const results: Results = this.routeRecognizer.recognize(path);
         if (results && results.length === 1) {
             return new Route(results[0]);
         }

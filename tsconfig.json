@@ -1,12 +1,19 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "target": "es6",
+    "declaration": true,
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
   "include": [
     "src/**/*"
